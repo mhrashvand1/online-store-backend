@@ -1,0 +1,18 @@
+# Django
+django
+django-decouple
+django-filter
+Pillow
+django-cleanup
+django-phonenumber-field[phonenumbers]
+#django-crontab
+# Drf
+djangorestframework
+djangorestframework-simplejwt
+drf-yasg
+# Postgres
+psycopg2-binary
+# Redis
+redis
+# other
+gunicorn
