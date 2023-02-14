@@ -12,8 +12,6 @@ services:
         #   - 8000
         volumes:
             - .:/usr/src/app/
-        env_file:
-            - ${ENVFILE:-.env}
         depends_on:
             - postgres
             - redis
