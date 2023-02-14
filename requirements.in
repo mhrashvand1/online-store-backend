@@ -2,7 +2,7 @@
 django
 python-decouple
 django-filter
-Pillow
+# Pillow
 django-cleanup
 django-phonenumber-field[phonenumbers]
 #django-crontab

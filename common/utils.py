@@ -1,6 +1,8 @@
 from urllib import parse
 from config import settings
 import hashlib
+from config.settings import PROJECT_HOST, PROJECT_PORT, PROJECT_SCHEMA
+
 
 def reverse_dict(dictionary):
     keys = dictionary.keys()
@@ -29,3 +31,12 @@ def send_sms(text, phone_number):
     print(f"{'-'*50}\nSMS sent to {phone_number}\ncontent:\n{text}\n{'-'*50}")
     ...
     # TODO: SMS panel api
+
+
+def get_abs_url(path):
+    main_url = PROJECT_SCHEMA + "://" + PROJECT_HOST + ":" + PROJECT_PORT
+    if not path.startswith('/'):
+        path = '/' + path
+    if not path.endswith('/'):
+        path += '/'
+    return main_url + path

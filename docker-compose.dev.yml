@@ -1,6 +1,22 @@
 version: "3.8"
 
 services:
+    app:
+        image: online_store:1.0.0
+        container_name: online_store
+        build: .
+        restart: on-failure
+        ports:
+            - "8000:8000"
+        # expose:
+        #   - 8000
+        volumes:
+            - .:/usr/src/app/
+        env_file:
+            - ${ENVFILE:-.env}
+        depends_on:
+            - postgres
+            - redis
 
     postgres:
         image: postgres:14.5-alpine
@@ -22,7 +38,6 @@ services:
             - ALLOW_EMPTY_PASSWORD=yes
         volumes:
             - redis-data:/data
-
 
 volumes:
     postgres-data:

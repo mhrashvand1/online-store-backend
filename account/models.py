@@ -81,7 +81,7 @@ class Address(BaseModel):
         verbose_name=_('user')
     )
     state = models.CharField(_("state"), max_length=150, blank=True)
-    city = models.CharField(_("state"), max_length=150, blank=True)
+    city = models.CharField(_("city"), max_length=150, blank=True)
     full_address = models.CharField(_("full address"), max_length=1200, blank=True)
     
     class Meta:
@@ -99,8 +99,20 @@ class Location(BaseModel):
         related_name='location',
         verbose_name=_('user')
     )
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    latitude = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        blank=True, 
+        null=True, 
+        verbose_name=_("latitude")
+    )
+    longitude = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        blank=True, 
+        null=True, 
+        verbose_name=_("longitude")
+    )
     
     class Meta:
         db_table = 'Location'

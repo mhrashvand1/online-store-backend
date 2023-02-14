@@ -57,8 +57,6 @@ packaging==23.0
     # via drf-yasg
 phonenumbers==8.13.6
     # via django-phonenumber-field
-pillow==9.4.0
-    # via -r requirements.in
 psycopg2-binary==2.9.5
     # via -r requirements.in
 pyjwt==2.6.0

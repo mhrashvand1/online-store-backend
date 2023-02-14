@@ -1,7 +1,7 @@
 from pathlib import Path
 from decouple import config
 import redis
-import os 
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,13 +27,13 @@ def parse_list_cast(value):
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
     cast=parse_list_cast,
-    default=["127.0.0.1", "localhost"]
+    default=["*"]
 )
 
 INTERNAL_IPS = config(
     "INTERNAL_IPS",
     cast=parse_list_cast,
-    default=["127.0.0.1", "localhost"]
+    default=["*"]
 )
 
 # Application definition
@@ -46,9 +46,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Third party apps
+    'rest_framework',
     'drf_yasg',
     'django_cleanup.apps.CleanupConfig',
     'phonenumber_field',
+    'rest_framework_simplejwt',
     # Project apps
     'account.apps.AccountConfig',
 ]
@@ -89,11 +91,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": config("DB_ENGINE", default="django.db.backends.sqlite3"),
-        "NAME": config("DB_NAME", default="db.sqlite3"),
+        "ENGINE": config("DB_ENGINE", default="django.db.backends.postgresql"),
+        "NAME": config("DB_NAME", default="online_store"),
         "USER": config("DB_USER", default="online_store"),
         "PASSWORD": config("DB_PASSWORD", default="online_store"),
-        "HOST": config("DB_HOST", default="localhost"),
+        "HOST": config("DB_HOST", default="postgres"),
         "PORT": config("DB_PORT", default=5432),
     }
 }
@@ -146,7 +148,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Redis
-REDIS_HOST = config("REDIS_HOST", default="localhost")
+REDIS_HOST = config("REDIS_HOST", default="redis")
 REDIS_PORT = config("REDIS_PORT", default=6379)
 REDIS_DB_NUMBER = config("REDIS_DB_NUMBER", default=0)
 
@@ -169,24 +171,33 @@ PHONENUMBER_DEFAULT_REGION = 'IR'
 CODE_EXPIRE_TIME = 3 # minutes 
 CODE_LENGTH = 6 # max:20
 
-
-# Default superuser specifications (the first superuser)
-DEFAULT_SUPERUSER_PHONENUMBER = config(
-    "DEFAULT_SUPERUSER_PHONENUMBER", 
-    default="09035004342"
-)
-DEFAULT_SUPERUSER_FIRST_NAME = config(
-    "DEFAULT_SUPERUSER_FIRST_NAME",
-    default="mmd"
-)
-DEFAULT_SUPERUSER_LAST_NAME = config(
-    "DEFAULT_SUPERUSER_LAST_NAME",
-    default="rshvnd"
-)
-DEFAULT_SUPERUSER_PASSWORD = config(
-    "DEFAULT_SUPERUSER_PASSWORD",
-    default="1234"
-)
-
 # User model
 AUTH_USER_MODEL = 'account.User'
+
+# URL
+PROJECT_HOST = "127.0.0.1"
+if DEBUG:
+    PROJECT_PORT = "8000"
+else:
+    PROJECT_PORT = "80"  
+PROJECT_SCHEMA = "http" 
+
+# DRF
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_FILTER_BACKENDS':(
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter'
+    ),
+    'DEFAULT_PAGINATION_CLASS':'common.paginations.DefaultPagination'
+}
+
+# Simple JWT
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=24),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=60),
+    "AUTH_HEADER_TYPES": ("Bearer", "jwt", "JWT",),
+}
