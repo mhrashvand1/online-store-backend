@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.urls import path, re_path
 from common.swaggers import schema_view
+from account.forms import AuthenticationForm
 
+admin.site.login_form = AuthenticationForm
 
 urlpatterns = [
     path('admin/', admin.site.urls),

@@ -28,8 +28,6 @@ django==4.1.6
     #   drf-yasg
 django-cleanup==7.0.0
     # via -r requirements.in
-django-decouple==2.1
-    # via -r requirements.in
 django-filter==22.1
     # via -r requirements.in
 django-phonenumber-field[phonenumbers]==7.0.2
@@ -65,6 +63,8 @@ psycopg2-binary==2.9.5
     # via -r requirements.in
 pyjwt==2.6.0
     # via djangorestframework-simplejwt
+python-decouple==3.7
+    # via -r requirements.in
 pytz==2022.7.1
     # via
     #   djangorestframework

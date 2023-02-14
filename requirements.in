@@ -1,6 +1,6 @@
 # Django
 django
-django-decouple
+python-decouple
 django-filter
 Pillow
 django-cleanup

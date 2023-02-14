@@ -1,6 +1,7 @@
 from pathlib import Path
 from decouple import config
 import redis
+import os 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -47,7 +48,9 @@ INSTALLED_APPS = [
     # Third party apps
     'drf_yasg',
     'django_cleanup.apps.CleanupConfig',
+    'phonenumber_field',
     # Project apps
+    'account.apps.AccountConfig',
 ]
 
 MIDDLEWARE = [
@@ -147,7 +150,7 @@ REDIS_HOST = config("REDIS_HOST", default="localhost")
 REDIS_PORT = config("REDIS_PORT", default=6379)
 REDIS_DB_NUMBER = config("REDIS_DB_NUMBER", default=0)
 
-redis_conn = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB_NUMBER)
+redis_connection = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB_NUMBER)
 
 # Cache FrameWork Config
 CACHES = {
@@ -156,3 +159,34 @@ CACHES = {
         "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB_NUMBER}",
     }
 }
+
+# Phone number field config
+PHONENUMBER_DB_FORMAT = "NATIONAL"
+PHONENUMBER_DEFAULT_FORMAT = "NATIONAL"
+PHONENUMBER_DEFAULT_REGION = 'IR'
+
+# One-time code config
+CODE_EXPIRE_TIME = 3 # minutes 
+CODE_LENGTH = 6 # max:20
+
+
+# Default superuser specifications (the first superuser)
+DEFAULT_SUPERUSER_PHONENUMBER = config(
+    "DEFAULT_SUPERUSER_PHONENUMBER", 
+    default="09035004342"
+)
+DEFAULT_SUPERUSER_FIRST_NAME = config(
+    "DEFAULT_SUPERUSER_FIRST_NAME",
+    default="mmd"
+)
+DEFAULT_SUPERUSER_LAST_NAME = config(
+    "DEFAULT_SUPERUSER_LAST_NAME",
+    default="rshvnd"
+)
+DEFAULT_SUPERUSER_PASSWORD = config(
+    "DEFAULT_SUPERUSER_PASSWORD",
+    default="1234"
+)
+
+# User model
+AUTH_USER_MODEL = 'account.User'
