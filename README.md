@@ -1,4 +1,5 @@
 # online-store-backend   
+(The project is not complete)  
 
 ## Run 
 ``` bash
@@ -9,7 +10,7 @@ cd online-store-backend
 docker-compose -f docker-compose.dev.yml up   
 ```   
 
-For create superuser:   
+To create a superuser:   
  
 ``` bash   
 docker-compose -f docker-compose.dev.yml exec app python manage.py createsuperuser2 <phone_number> # --password=<password>  
