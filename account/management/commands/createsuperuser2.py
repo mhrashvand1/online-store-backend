@@ -1,7 +1,10 @@
-from account.models import User, Address, Location
+from account.models import Address, Location
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils.crypto import get_random_string
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class Command(BaseCommand):
 

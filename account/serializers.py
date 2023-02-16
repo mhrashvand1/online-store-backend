@@ -1,14 +1,16 @@
 from rest_framework import serializers
-from account.models import User, Location, Address
+from account.models import Location, Address
 from phonenumber_field.serializerfields import PhoneNumberField
 from django.db import transaction
 from django.utils.crypto import get_random_string
-from rest_framework.exceptions import APIException, ValidationError, NotFound
+from rest_framework.exceptions import APIException, ValidationError, PermissionDenied
 from rest_framework.validators import UniqueValidator
 from config.settings import CODE_LENGTH
 from common.utils import hash_string
 from account.utils import retrieve_code
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class AddressSerializer(serializers.Serializer):
     state = serializers.CharField(allow_blank=False, allow_null=False, max_length=150, required=True)
@@ -40,7 +42,7 @@ class UserReadOnlySerializer(serializers.ModelSerializer):
         )    
     
 
-# TODO: captchat field
+# TODO: captcha field
 class SignUpSerializer(serializers.ModelSerializer):
     phone_number = PhoneNumberField(
         allow_null=False, 
@@ -48,7 +50,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all())]
     )
-    address = AddressSerializer(many=False, allow_null=False)
+    address = AddressSerializer(many=False, allow_null=False, required=True)
 
     class Meta:
         model = User
@@ -76,7 +78,7 @@ class SignUpSerializer(serializers.ModelSerializer):
             raise APIException("Error while creating user.")
 
 
-# TODO: captchat field
+# TODO: captcha field
 class SignInSerializer(serializers.Serializer):
     phone_number = PhoneNumberField(
         allow_null=False, 
@@ -85,11 +87,12 @@ class SignInSerializer(serializers.Serializer):
     )
     
     def validate_phone_number(self, value):
-        qs = User.objects.filter(phone_number=value)
-        user = qs.first()
-        if not user:
-            raise ValidationError(f"User with phone number {value} does not exists.")
         
+        try:
+            user = User.objects.get(phone_number=value)
+        except User.DoesNotExist:
+            raise ValidationError(f"User with phone number {value} does not exists.")
+    
         return str(user.phone_number.national_number)
  
 
@@ -110,11 +113,12 @@ class AuthConfirmSerializer(serializers.Serializer):
     def validate(self, data):
         phone_number = data['phone_number']
 
-        qs = User.objects.filter(phone_number=phone_number)
-        user = qs.first()
-        if not user:
+        try:
+            user = User.objects.select_related("address").select_related("location"). \
+                get(phone_number=phone_number)
+        except User.DoesNotExist:
             raise ValidationError(f"User with phone number {phone_number} does not exists.")
-        
+     
         phone_number = str(user.phone_number.national_number)
         stored_code = retrieve_code(phone_number=phone_number)
         raw_code = data["code"]
@@ -127,11 +131,68 @@ class AuthConfirmSerializer(serializers.Serializer):
         return data
 
 
-class UserInfoUpdateSerializer(serializers.Serializer):
-    pass 
+
+class UserInfoUpdateSerializer(serializers.ModelSerializer):
+    address = AddressSerializer(many=False, allow_null=False, required=True)
+    
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "address"]
+
+    def update(self, instance, validated_data):
+        address_data = validated_data.pop("address")
+        address = instance.address
+        address.state = address_data.get("state", address.state)
+        address.city = address_data.get("city", address.city)
+        address.full_address = address_data.get("full_address", address.full_address)
+        address.save()
+        instance.first_name = validated_data.get("first_name", instance.first_name)
+        instance.last_name = validated_data.get("last_name", instance.last_name)
+        instance.save()
+        return instance
+
 
 class MakeStaffSerializer(serializers.Serializer):
-    pass
+    phone_number = PhoneNumberField(
+        allow_null=False, 
+        allow_blank=False, 
+        required=True,
+    )
 
+    def validate(self, data):
+        phone_number = data['phone_number']
+        try:
+            user = User.objects.get(phone_number=phone_number)
+        except User.DoesNotExist:
+            raise ValidationError(f"User with phone number {phone_number} does not exists.")
+        
+        if user.is_staff:
+            raise ValidationError(f"User with phone number {phone_number} is already staff.")   
+    
+        data['user'] = user
+        return data
+        
+        
 class UnMakeStaffSerializer(serializers.Serializer):
-    pass
+    phone_number = PhoneNumberField(
+        allow_null=False, 
+        allow_blank=False, 
+        required=True,
+    )
+
+    def validate(self, data):
+        phone_number = data['phone_number']
+        try:
+            user = User.objects.get(phone_number=phone_number)
+        except User.DoesNotExist:
+            raise ValidationError(f"User with phone number {phone_number} does not exists.")
+        
+        if not user.is_staff:
+            raise ValidationError(f"User with phone number {phone_number} is not staff.")   
+        
+        if user.is_superuser:
+            raise PermissionDenied(f"User with phone number {phone_number} is a superuser.")
+        
+        data['user'] = user
+        return data
+
