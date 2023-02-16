@@ -204,3 +204,6 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=60),
     "AUTH_HEADER_TYPES": ("Bearer", "jwt", "JWT",),
 }
+
+# Product
+PRODUCT_MAX_IMAGES_COUNT = 10  # except main image

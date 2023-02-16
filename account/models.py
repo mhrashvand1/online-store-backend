@@ -74,7 +74,6 @@ class User(AbstractBaseUser, PermissionsMixin, UUIDBaseModel):
 class Address(BaseModel):
     user = models.OneToOneField(
         to='account.User', 
-        to_field='phone_number', 
         primary_key=True,
         on_delete=models.CASCADE,
         related_name='address',
@@ -86,14 +85,13 @@ class Address(BaseModel):
     
     class Meta:
         db_table = 'Address'
-        verbose_name = 'address'
-        verbose_name_plural = 'address'
+        verbose_name = _('address')
+        verbose_name_plural = _('address')
           
     
 class Location(BaseModel):
     user = models.OneToOneField(
         to='account.User', 
-        to_field='phone_number', 
         primary_key=True,
         on_delete=models.CASCADE,
         related_name='location',
@@ -116,5 +114,5 @@ class Location(BaseModel):
     
     class Meta:
         db_table = 'Location'
-        verbose_name = 'location'
-        verbose_name_plural = 'location'
+        verbose_name = _('location')
+        verbose_name_plural = _('location')
