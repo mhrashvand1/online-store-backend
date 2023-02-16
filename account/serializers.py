@@ -43,21 +43,16 @@ class UserReadOnlySerializer(serializers.ModelSerializer):
     
 
 # TODO: captcha field
-class SignUpSerializer(serializers.ModelSerializer):
+class SignUpSerializer(serializers.Serializer):
     phone_number = PhoneNumberField(
         allow_null=False, 
         allow_blank=False, 
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all())]
     )
+    first_name = serializers.CharField(allow_blank=False, allow_null=False, max_length=150, required=True)
+    last_name = serializers.CharField(allow_blank=False, allow_null=False, max_length=150, required=True)
     address = AddressSerializer(many=False, allow_null=False, required=True)
-
-    class Meta:
-        model = User
-        fields = (
-            "phone_number", "first_name", "last_name",
-            "address",
-        )
     
     def create(self, validated_data):
         address = validated_data.pop("address")  
@@ -132,13 +127,11 @@ class AuthConfirmSerializer(serializers.Serializer):
 
 
 
-class UserInfoUpdateSerializer(serializers.ModelSerializer):
+class UserInfoUpdateSerializer(serializers.Serializer):
+    first_name = serializers.CharField(allow_blank=False, allow_null=False, max_length=150, required=True)
+    last_name = serializers.CharField(allow_blank=False, allow_null=False, max_length=150, required=True)
     address = AddressSerializer(many=False, allow_null=False, required=True)
     
-    class Meta:
-        model = User
-        fields = ["first_name", "last_name", "address"]
-
     def update(self, instance, validated_data):
         address_data = validated_data.pop("address")
         address = instance.address
