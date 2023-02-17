@@ -24,7 +24,7 @@ from common.permissions import IsSuperUser
 from account.throttles import AuthConfirmThrottle
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
-from django.db.models import F, Q
+
 
 User = get_user_model()
 

@@ -5,6 +5,8 @@ from django.db import transaction
 from rest_framework.exceptions import APIException, ValidationError
 from django.db.models import Count
 from config.settings import PRODUCT_MAX_IMAGES_COUNT
+from django.urls import reverse
+
 
 class CategorySerializer(serializers.ModelSerializer):
     
@@ -120,7 +122,9 @@ class ImageRelatedField(serializers.PrimaryKeyRelatedField):
         queryset = Image.objects.filter(product=product) 
         return queryset
 
+
 class ProductDeleteImageSerializer(serializers.Serializer):
+    
     image = ImageRelatedField(required=True, allow_null=False)
         
     def delete(self):
