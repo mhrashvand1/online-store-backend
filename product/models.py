@@ -1,5 +1,5 @@
 from django.db import models
-from common.models import BaseModel
+from common.models import BaseModel, UUIDBaseModel
 from django.utils.translation import gettext_lazy as _ 
 import os
 import time
@@ -9,7 +9,7 @@ def get_main_image_path(instance, filename):
     name = 'mainimage' + str(time.time()).split('.')[0] + '.' + suffix
     return os.path.join(str(instance.id), 'images', name)
 
-class Product(BaseModel):
+class Product(UUIDBaseModel):
     
     name = models.CharField(
         max_length=255, blank=False, null=False, verbose_name=_('name')
@@ -55,7 +55,7 @@ class Category(BaseModel):
 def get_image_path(instance, filename):
     suffix = filename.split('.')[-1]
     name = str(time.time()).split('.')[0] + '.' + suffix
-    return os.path.join(str(instance.id), 'images', 'otherimages', name)
+    return os.path.join(str(instance.product.id), 'images', 'otherimages', name)
       
 class Image(BaseModel):
     product = models.ForeignKey(

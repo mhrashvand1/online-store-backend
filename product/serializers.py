@@ -6,7 +6,7 @@ from rest_framework.exceptions import APIException, ValidationError
 from django.db.models import Count
 from config.settings import PRODUCT_MAX_IMAGES_COUNT
 from django.urls import reverse
-
+from urllib.parse import urlencode
 
 class CategorySerializer(serializers.ModelSerializer):
     
@@ -17,7 +17,9 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'description', 'products']
     
     def get_products(self, obj):
-        pass  # hyperlink
+        id = str(obj.id)
+        url = reverse('product:products-list')
+        return get_abs_url(url) + '?' + urlencode({"category":id})
     
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -48,7 +50,8 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         allow_empty=False,
         allow_null=False,
         child=serializers.ImageField(required=True, allow_null=False),
-        max_length=PRODUCT_MAX_IMAGES_COUNT
+        max_length=PRODUCT_MAX_IMAGES_COUNT,
+        write_only=True
     )
     category = serializers.PrimaryKeyRelatedField(
         allow_null=False, 
@@ -118,10 +121,9 @@ class ProductAddImageSerializer(serializers.Serializer):
 
 class ImageRelatedField(serializers.PrimaryKeyRelatedField):
     def get_queryset(self):
-        product = self.context['product']
-        queryset = Image.objects.filter(product=product) 
+        slug = self.context['view'].kwargs['product_slug']
+        queryset = Image.objects.filter(product__slug=slug)
         return queryset
-
 
 class ProductDeleteImageSerializer(serializers.Serializer):
     
@@ -138,3 +140,4 @@ class ProductChargeStockSerializers(serializers.Serializer):
     def perform_charge(self):
         product = self.context['product']
         product.stock += self.validated_data['count']
+        product.save()
