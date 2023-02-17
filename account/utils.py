@@ -23,6 +23,9 @@ def retrieve_code(phone_number):
     if code:
         return code.decode("utf-8") 
 
+def delete_code(phone_number):
+    return redis_connection.delete(phone_number)
+
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
 

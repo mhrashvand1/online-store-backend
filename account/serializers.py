@@ -7,8 +7,9 @@ from rest_framework.exceptions import APIException, ValidationError, PermissionD
 from rest_framework.validators import UniqueValidator
 from config.settings import CODE_LENGTH
 from common.utils import hash_string
-from account.utils import retrieve_code
+from account.utils import retrieve_code, delete_code
 from django.contrib.auth import get_user_model
+
 
 User = get_user_model()
 
@@ -121,6 +122,9 @@ class AuthConfirmSerializer(serializers.Serializer):
       
         if not stored_code or (hashed_code != stored_code):
             raise ValidationError("Invalid code.")
+        
+        # Make the code expired:
+        delete_code(phone_number)
         
         data["user"] = user
         return data
