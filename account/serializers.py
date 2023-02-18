@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from wallet.models import Wallet
 from common.utils import get_abs_url
 from django.urls import reverse
+from urllib.parse import urlencode
 
 
 User = get_user_model()
@@ -39,13 +40,17 @@ class UserReadOnlySerializer(serializers.ModelSerializer):
     location = LocationSerializer(read_only=True, many=False)
     wallet = serializers.SerializerMethodField()
     payments = serializers.SerializerMethodField()
+    detail = serializers.HyperlinkedIdentityField(
+        view_name="account:users-detail", lookup_field="phone_number",
+        read_only=True
+    )
   
     class Meta:
         model = User
         fields = (
             "phone_number", "first_name", "last_name", 
             "is_staff", "is_superuser", "address", "location",
-            "wallet", "payments"
+            "wallet", "payments", "detail"
         )    
         
     def get_wallet(self, obj):
@@ -54,15 +59,14 @@ class UserReadOnlySerializer(serializers.ModelSerializer):
         data = {
             "id":str(wallet_id),
             "balance":wallet.balance,
-            # "url":get_abs_url(reverse("wallet:wallets-detail", kwargs={"pk":wallet_id}))
+            "url":get_abs_url(reverse("wallet:wallets-detail", kwargs={"pk":wallet_id}))
         }
         return data
     
     def get_payments(self, obj):
-        # TODO: hyperlink to the payments list with ?user=<phone_number>
-        # None that for common users the queryset of the payments is the list of their own payments.
-        pass
-    
+        phone_number = str(obj.phone_number.national_number)
+        url = get_abs_url(reverse("wallet:payments-list")) + '?' + urlencode({"user":phone_number})
+        return url
     
 
 # TODO: captcha field
@@ -155,10 +159,15 @@ class AuthConfirmSerializer(serializers.Serializer):
 
 
 class UserInfoUpdateSerializer(serializers.Serializer):
+    phone_number = PhoneNumberField(read_only=True)
     first_name = serializers.CharField(allow_blank=False, allow_null=False, max_length=150, required=True)
     last_name = serializers.CharField(allow_blank=False, allow_null=False, max_length=150, required=True)
     address = AddressSerializer(many=False, allow_null=False, required=True)
-    
+    detail = serializers.HyperlinkedIdentityField(
+        view_name="account:users-detail", lookup_field="phone_number",
+        read_only=True
+    )
+  
     def update(self, instance, validated_data):
         address_data = validated_data.pop("address")
         address = instance.address

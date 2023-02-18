@@ -41,7 +41,6 @@ class CategoryViewSet(ModelViewSet):
 class ProductViewSet(ModelViewSet):
     
     lookup_field = 'slug'
-    lookup_url_kwarg = 'product_slug'
     filterset_class = ProductFilter
     search_fields = ['name', 'description', 'category__name', 'category__description']
     ordering_fields = ['price', 'stock', ]

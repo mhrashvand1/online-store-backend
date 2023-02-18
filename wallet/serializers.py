@@ -6,14 +6,18 @@ from django.urls import reverse
 
 class WalletSerializer(serializers.ModelSerializer):
     
+    detail = serializers.HyperlinkedIdentityField(
+        view_name="wallet:wallets-detail", lookup_field='pk',
+        read_only=True,
+    )
     user = serializers.SerializerMethodField()
     
     class Meta:
         model = Wallet
-        fields = ['id', 'user', 'balance']
+        fields = ['id', 'user', 'balance', 'detail']
         
     def get_user(self, obj):
-        phone_number = str(obj.user.phone_number.natiobal_number)
+        phone_number = str(obj.user.phone_number.national_number)
         data = {
             "phone_number":phone_number,
             "full_name":obj.user.get_full_name(),
@@ -25,17 +29,29 @@ class WalletSerializer(serializers.ModelSerializer):
 # Always read only
 class PaymentSeralizer(serializers.ModelSerializer):
 
+    detail = serializers.HyperlinkedIdentityField(
+        view_name="wallet:payments-detail", source='pk',
+        read_only=True,
+    )
     user = serializers.SerializerMethodField()
  
     class Meta:
         model = Payment
-        fields = ['id', 'user', 'amount', 'status', 'error_code', 'error_message']
+        fields = [
+            'id', 'user', 'amount', 'status', 
+            'error_code', 'error_message', 'detail'
+        ]
         
     def get_user(self, obj):
-        phone_number = str(obj.user.phone_number.natiobal_number)
+        phone_number = str(obj.user.phone_number.national_number)
         data = {
             "phone_number":phone_number,
             "full_name":obj.user.get_full_name(),
             "url": get_abs_url(reverse("account:users-detail", kwargs={"phone_number":phone_number}))
         }
         return data
+    
+    
+class FakeChargeWalletSerializer(serializers.Serializer):
+    amount = serializers.IntegerField(min_value=1000, required=True, allow_null=False)
+    

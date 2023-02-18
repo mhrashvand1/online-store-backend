@@ -107,7 +107,7 @@ class UserViewSet(
     def permission_classes(self):
         if self.action in ['makestaff', 'unmakestaff',]:
             return [IsSuperUser,]
-        return [IsAdminUser,]
+        return [IsAuthenticated,]
     
     lookup_field = 'phone_number'
     filterset_fields = ['is_staff', 'is_superuser',]
@@ -122,9 +122,14 @@ class UserViewSet(
             return UserReadOnlySerializer
         
     def get_queryset(self):
-        qs = User.objects.prefetch_related("address") \
-            .prefetch_related("location").all()
-        return qs
+        user = self.request.user
+        if user.is_staff:
+            queryset = User.objects.prefetch_related("address") \
+                .prefetch_related("location").prefetch_related("wallet").all()
+        else:
+            queryset = User.objects.prefetch_related("address") \
+                .prefetch_related("location").prefetch_related("wallet").filter(id=user.id)  
+        return queryset
     
     @action(detail=False, methods=['put',], url_name='makestaff', url_path='makestaff')
     def makestaff(self, request, *args, **kwargs):

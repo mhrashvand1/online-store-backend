@@ -8,13 +8,18 @@ from config.settings import PRODUCT_MAX_IMAGES_COUNT
 from django.urls import reverse
 from urllib.parse import urlencode
 
+
 class CategorySerializer(serializers.ModelSerializer):
     
     products = serializers.SerializerMethodField()
+    detail = serializers.HyperlinkedIdentityField(
+        view_name='product:categories-detail', 
+        lookup_field="slug",  read_only=True,
+    )
     
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'description', 'products']
+        fields = ['id', 'name', 'slug', 'description', 'products', 'detail']
     
     def get_products(self, obj):
         id = str(obj.id)
@@ -33,13 +38,17 @@ class ProductReadSerializer(serializers.ModelSerializer):
     
     category = CategorySerializer(many=False, read_only=True)
     images = ImageSerializer(many=True, read_only=True)
+    detail = serializers.HyperlinkedIdentityField(
+        view_name='product:products-detail', 
+        lookup_field="slug", read_only=True
+    )
     
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'description', 'slug', 
             'price', 'stock', 'main_image', 'category',
-            'images', "created_at", "updated_at",
+            'images', "created_at", "updated_at", "detail"
         ]
     
     
@@ -58,13 +67,17 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(), 
         required=True
     )
-
+    detail = serializers.HyperlinkedIdentityField(
+        view_name='product:products-detail', 
+        lookup_field="slug", read_only=True,
+    )
+    
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'description', 'slug', 
             'price', 'stock', 'main_image', 'category',
-            'images', "created_at", "updated_at",
+            'images', "created_at", "updated_at", "detail"
         ]
     
     def create(self, validated_data):
@@ -92,13 +105,16 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(), 
         required=True
     )
-  
+    detail = serializers.HyperlinkedIdentityField(
+        view_name='product:products-detail', 
+        lookup_field="slug", read_only=True,
+    )
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'description', 'slug', 
             'price', 'stock', 'main_image', 'category',
-            "created_at", "updated_at",
+            "created_at", "updated_at", "detail"
         ]
     
 
@@ -122,7 +138,7 @@ class ProductAddImageSerializer(serializers.Serializer):
 
 class ImageRelatedField(serializers.PrimaryKeyRelatedField):
     def get_queryset(self):
-        slug = self.context['view'].kwargs['product_slug']
+        slug = self.context['view'].kwargs['slug']
         queryset = Image.objects.filter(product__slug=slug)
         return queryset
 
