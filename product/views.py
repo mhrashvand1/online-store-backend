@@ -1,11 +1,5 @@
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from rest_framework.generics import GenericAPIView
-from rest_framework.mixins import (
-    ListModelMixin,
-    RetrieveModelMixin, 
-    UpdateModelMixin
-)
 from product.serializers import (
     CategorySerializer,
     ProductReadSerializer,
@@ -15,11 +9,9 @@ from product.serializers import (
     ProductDeleteImageSerializer,
     ProductChargeStockSerializers
 )
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
-from common.permissions import IsSuperUser 
-from django.contrib.auth import get_user_model
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.decorators import action
-from product.models import Product, Category, Image
+from product.models import Product, Category
 from django.db.models import Count
 from product.filters import CategoryFilter, ProductFilter
 from rest_framework.permissions import SAFE_METHODS

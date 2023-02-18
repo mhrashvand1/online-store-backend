@@ -9,6 +9,9 @@ from config.settings import CODE_LENGTH
 from common.utils import hash_string
 from account.utils import retrieve_code, delete_code
 from django.contrib.auth import get_user_model
+from wallet.models import Wallet
+from common.utils import get_abs_url
+from django.urls import reverse
 
 
 User = get_user_model()
@@ -34,13 +37,32 @@ class UserReadOnlySerializer(serializers.ModelSerializer):
     
     address = AddressSerializer(read_only=True, many=False)
     location = LocationSerializer(read_only=True, many=False)
+    wallet = serializers.SerializerMethodField()
+    payments = serializers.SerializerMethodField()
   
     class Meta:
         model = User
         fields = (
             "phone_number", "first_name", "last_name", 
-            "is_staff", "is_superuser", "address", "location"
+            "is_staff", "is_superuser", "address", "location",
+            "wallet", "payments"
         )    
+        
+    def get_wallet(self, obj):
+        wallet = obj.wallet
+        wallet_id = wallet.id
+        data = {
+            "id":str(wallet_id),
+            "balance":wallet.balance,
+            # "url":get_abs_url(reverse("wallet:wallets-detail", kwargs={"pk":wallet_id}))
+        }
+        return data
+    
+    def get_payments(self, obj):
+        # TODO: hyperlink to the payments list with ?user=<phone_number>
+        # None that for common users the queryset of the payments is the list of their own payments.
+        pass
+    
     
 
 # TODO: captcha field
@@ -68,7 +90,8 @@ class SignUpSerializer(serializers.Serializer):
                     city=address["city"],
                     full_address=address["full_address"]
                 )
-                Location.objects.create(user=user)  ## get location data later
+                Location.objects.create(user=user)
+                Wallet.objects.create(user=user, balance=0)
                 return user
         except:
             raise APIException("Error while creating user.")

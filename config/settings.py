@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     'product.apps.ProductConfig',
     'ordermanagement.apps.OrdermanagementConfig',
+    'wallet.apps.WalletConfig',
 ]
 
 MIDDLEWARE = [

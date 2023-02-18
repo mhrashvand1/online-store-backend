@@ -39,7 +39,7 @@ class ProductReadSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'slug', 
             'price', 'stock', 'main_image', 'category',
-            'images'
+            'images', "created_at", "updated_at",
         ]
     
     
@@ -64,7 +64,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'slug', 
             'price', 'stock', 'main_image', 'category',
-            'images'
+            'images', "created_at", "updated_at",
         ]
     
     def create(self, validated_data):
@@ -98,6 +98,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'slug', 
             'price', 'stock', 'main_image', 'category',
+            "created_at", "updated_at",
         ]
     
 
