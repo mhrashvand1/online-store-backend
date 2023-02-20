@@ -201,8 +201,8 @@ REST_FRAMEWORK = {
 
 # Simple JWT
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=24),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=60),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=10), # temporary
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=60),  # temporary
     "AUTH_HEADER_TYPES": ("Bearer", "jwt", "JWT",),
 }
 

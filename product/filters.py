@@ -17,7 +17,9 @@ class ProductFilter(filters.FilterSet):
     price__gt = filters.NumberFilter(field_name='price', lookup_expr='gt')
     stock__lt = filters.NumberFilter(field_name='stock', lookup_expr='lt')
     stock__gt = filters.NumberFilter(field_name='stock', lookup_expr='gt') 
-    
+    discount_percent__lt = filters.NumberFilter(field_name='discount_percent', lookup_expr='lt')
+    discount_percent__gt = filters.NumberFilter(field_name='discount_percent', lookup_expr='gt')
+
     class Meta:
         model = Product
-        fields = ['price', 'category', 'stock',]
+        fields = ['price', 'category', 'stock', 'discount_percent',]

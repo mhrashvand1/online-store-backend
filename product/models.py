@@ -3,6 +3,8 @@ from common.models import BaseModel, UUIDBaseModel
 from django.utils.translation import gettext_lazy as _ 
 import os
 import time
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 
 def get_main_image_path(instance, filename):
     suffix = filename.split('.')[-1]
@@ -18,6 +20,11 @@ class Product(UUIDBaseModel):
         max_length=3500, blank=False, null=False, verbose_name=_('description')
     )
     price = models.PositiveBigIntegerField(blank=False, null=False, verbose_name=_('price'))
+    discount_percent = models.SmallIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        default=0, 
+        verbose_name=_('discount percent')
+    )
     slug = models.SlugField(
         max_length=255, null=False, blank=False,
         unique=True, db_index=True, verbose_name=_('slug')
@@ -31,6 +38,12 @@ class Product(UUIDBaseModel):
     
     def __str__(self) -> str:
         return f"{str(self.id)}-{self.name}"
+    
+    def get_discounted_price(self):
+        return self.price - self.price*(self.discount_percent/100)
+    
+    def get_discount_amount(self):
+        return self.price*(self.discount_percent/100)
     
     class Meta:
         db_table = 'Product'

@@ -42,12 +42,15 @@ class ProductReadSerializer(serializers.ModelSerializer):
         view_name='product:products-detail', 
         lookup_field="slug", read_only=True
     )
+    discounted_price = serializers.ReadOnlyField(source='get_discounted_price') ##
+    discount_amount = serializers.ReadOnlyField(source='get_discount_amount') ##
     
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'description', 'slug', 
-            'price', 'stock', 'main_image', 'category',
+            'price', 'discount_percent', 'discounted_price', 'discount_amount',
+            'stock', 'main_image', 'category',
             'images', "created_at", "updated_at", "detail"
         ]
     
@@ -71,12 +74,15 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         view_name='product:products-detail', 
         lookup_field="slug", read_only=True,
     )
-    
+    discounted_price = serializers.ReadOnlyField(source='get_discounted_price') ##
+    discount_amount = serializers.ReadOnlyField(source='get_discount_amount') ##
+
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'description', 'slug', 
-            'price', 'stock', 'main_image', 'category',
+            'price', 'discount_percent', 'discounted_price', 'discount_amount',
+            'stock', 'main_image', 'category',
             'images', "created_at", "updated_at", "detail"
         ]
     
@@ -109,11 +115,15 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         view_name='product:products-detail', 
         lookup_field="slug", read_only=True,
     )
+    discounted_price = serializers.ReadOnlyField(source='get_discounted_price') ##
+    discount_amount = serializers.ReadOnlyField(source='get_discount_amount') ##
+    
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'description', 'slug', 
-            'price', 'stock', 'main_image', 'category',
+            'price', 'discount_percent', 'discounted_price', 'discount_amount',
+            'stock', 'main_image', 'category',
             "created_at", "updated_at", "detail"
         ]
     
