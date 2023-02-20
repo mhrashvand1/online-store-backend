@@ -18,6 +18,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.db import transaction
 from rest_framework.exceptions import APIException
+from rest_framework.generics import GenericAPIView
 
 
 class WalletViewSet(
@@ -94,7 +95,7 @@ class PaymentViewSet(
         return Response(serializer.data)
 
 
-class FakeChargeWalletView(APIView):
+class FakeChargeWalletView(GenericAPIView):
     
     serializer_class = FakeChargeWalletSerializer
     permission_classes = [IsAuthenticated,]
@@ -111,7 +112,10 @@ class FakeChargeWalletView(APIView):
                 wallet.save()
                 Payment.objects.create(user=user, amount=amount) 
             message = {"detail":f"Your wallet was charged {amount} Tomans"}
-            response_ = {**message, **WalletSerializer(wallet).data}
+            response_ = {
+                **message, 
+                **WalletSerializer(wallet, context=self.get_serializer_context()).data
+            }
             return Response(response_, 200)
         except:
             raise APIException("Error while charging the wallet.")
