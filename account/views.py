@@ -88,7 +88,10 @@ class AuthConfirmView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data.pop("user")
-        user_data = UserReadOnlySerializer(user).data
+        user_data = UserReadOnlySerializer(
+            user, 
+            context=self.get_serializer_context()
+        ).data
         tokens = get_tokens_for_user(user)
         response_ = {**tokens, **user_data}
         return Response(
