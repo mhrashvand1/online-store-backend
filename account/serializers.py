@@ -13,6 +13,7 @@ from wallet.models import Wallet
 from common.utils import get_abs_url
 from django.urls import reverse
 from urllib.parse import urlencode
+from ordermanagement.models import Cart
 
 
 User = get_user_model()
@@ -96,6 +97,7 @@ class SignUpSerializer(serializers.Serializer):
                 )
                 Location.objects.create(user=user)
                 Wallet.objects.create(user=user, balance=0)
+                Cart.objects.create(user=user)
                 return user
         except:
             raise APIException("Error while creating user.")

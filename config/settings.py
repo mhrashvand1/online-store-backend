@@ -208,3 +208,10 @@ SIMPLE_JWT = {
 
 # Product
 PRODUCT_MAX_IMAGES_COUNT = 10  # except main image
+
+# Cart 
+MAX_CART_ITEMS = 7
+MAX_ITEM_QUANTITY = 10
+
+# Postage
+POSTAGE_FEE = 15000 # Toman

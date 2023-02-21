@@ -13,6 +13,7 @@ urlpatterns = [
     path('account/', include("account.urls", namespace='account')),
     path('product/', include('product.urls', namespace='product')),
     path('wallet/', include('wallet.urls', namespace='wallet')),
+    path('ordermanagement/', include('ordermanagement.urls', namespace='ordermanagement')),
    # swagger urls
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

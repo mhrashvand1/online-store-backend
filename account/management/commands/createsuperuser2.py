@@ -4,6 +4,7 @@ from django.db import transaction
 from django.utils.crypto import get_random_string
 from django.contrib.auth import get_user_model
 from wallet.models import Wallet
+from ordermanagement.models import Cart
 
 
 User = get_user_model()
@@ -42,6 +43,7 @@ class Command(BaseCommand):
                 Address.objects.get_or_create(user=u)
                 Location.objects.get_or_create(user=u)
                 Wallet.objects.create(user=u, balance=0)
+                Cart.objects.create(user=u)
             if created:
                 self.stdout.write(self.style.SUCCESS("Superuser created successfully."))
             else:
