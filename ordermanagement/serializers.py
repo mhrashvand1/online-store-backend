@@ -46,7 +46,7 @@ class CartSerializer(serializers.ModelSerializer):
     total_price = serializers.ReadOnlyField(source='get_total_price')
     total_discounted_price = serializers.ReadOnlyField(source='get_total_discounted_price')
     total_discount = serializers.ReadOnlyField(source='get_total_discount')
-    postage_fee = serializers.ReadOnlyField(sourec='get_postage_fee')
+    postage_fee = serializers.ReadOnlyField(source='get_postage_fee')
     final_price = serializers.ReadOnlyField(source='get_final_price')
     items = CartItemSerializer(many=True)
     
