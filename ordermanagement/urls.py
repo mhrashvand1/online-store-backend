@@ -4,6 +4,7 @@ from ordermanagement import views
 
 
 router = SimpleRouter()
+router.register('carts', views.CartViewSet, basename='carts')
 app_name = 'ordermanagement'
 urlpatterns = [
     

@@ -35,7 +35,7 @@ class Cart(UUIDBaseModel):
                 F("quantity")*F('product__price')
             )
         )
-        return total_price['x']
+        return total_price['x'] or 0
 
     def get_total_discounted_price(self):
         total_discounted_price = self.items.aggregate(
@@ -43,7 +43,7 @@ class Cart(UUIDBaseModel):
                 F("quantity")*(F('product__price') - F('product__price')*F('product__discount_percent')/100)
             )
         )
-        return total_discounted_price['x']
+        return total_discounted_price['x'] or 0
         
     
     def get_total_discount(self):
@@ -55,10 +55,11 @@ class Cart(UUIDBaseModel):
                 )
             )
         )
-        return total_discount['x'] 
+        return total_discount['x'] or 0
     
     def get_postage_fee(self):
-        if self.user.orders.filter(status='paid').exists():
+        orders_queryset = self.user.orders.filter(status='paid')
+        if self.get_items_count()==0 or orders_queryset.exists():
             return 0 
         return POSTAGE_FEE
     
@@ -160,7 +161,7 @@ class Order(UUIDBaseModel):
                 F("quantity")*F('p_price')
             )
         )
-        return total_price['x']
+        return total_price['x'] or 0
         
     def get_total_discounted_price(self):
         total_discounted_price = self.items.aggregate(
@@ -168,7 +169,7 @@ class Order(UUIDBaseModel):
                 F("quantity")*(F('p_price') - F('p_price')*F('p_discount_percent')/100)
             )
         )
-        return total_discounted_price['x']
+        return total_discounted_price['x'] or 0
     
     def get_total_discount(self):
         total_discount = self.items.aggregate(
@@ -179,7 +180,7 @@ class Order(UUIDBaseModel):
                 )
             )
         )
-        return total_discount['x']
+        return total_discount['x'] or 0
     
     def get_final_price(self):
         return self.get_total_discounted_price() + self.postage_fee
