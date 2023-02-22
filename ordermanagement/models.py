@@ -55,11 +55,16 @@ class Cart(UUIDBaseModel):
                 )
             )
         )
-        return total_discount['x']
+        return total_discount['x'] 
+    
+    def get_postage_fee(self):
+        if self.user.orders.filter(status='paid').exists():
+            return 0 
+        return POSTAGE_FEE
     
     def get_final_price(self):
-        return self.get_total_discounted_price() + POSTAGE_FEE
-           
+        return self.get_total_discounted_price() + self.get_postage_fee()
+    
     class Meta:
         db_table = 'Cart'
         verbose_name = _('cart')
