@@ -7,6 +7,7 @@ from ordermanagement.serializers import (
     CartAddProductSerializer,
     CartSubtractProductSerialzier,
 )
+from ordermanagement.utils import serialize_cart_session_data
 
 
 class CartViewSet(GenericViewSet):
@@ -34,18 +35,21 @@ class CartViewSet(GenericViewSet):
     def authenticated_mycart(self, request, *args, **kwargs):
         cart = request.user.cart
         serializer = self.get_serializer(cart)
-        return Response(serializer.data)
+        response_msg = {
+            "type":"authenticated-user",
+            **serializer.data
+        }
+        return Response(response_msg)
     
     def anonymous_mycart(self, request, *args, **kwargs):
         data = request.session.get('cart', {})
-        data = self.serialize_cart_session_data(data)
-        return Response(data)
+        data = serialize_cart_session_data(self, request, data)     
+        response_msg = {
+            "type":"anonymous-user",
+            **data
+        }
+        return Response(response_msg)
     
-    @staticmethod
-    def serialize_cart_session_data(data):
-        # TODO: calculate price, ...
-        ...
-        return data
     
     #####################################################
     #################### add product ####################
@@ -63,7 +67,7 @@ class CartViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.perform_add_product()
         response_msg = {
-            "detail":"Product added successfully",
+            "type":"authenticated-user",
             **CartSerializer(
                 request.user.cart, 
                 context=self.get_serializer_context()
@@ -77,8 +81,10 @@ class CartViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.perform_add_product()
         response_msg = {
-            "detail":"Product added successfully",
-            **self.serialize_cart_session_data(
+            "type":"anonymous-user",
+            **serialize_cart_session_data(
+                self,
+                request,
                 request.session.get('cart', {})
             )
         }
@@ -100,7 +106,7 @@ class CartViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.perform_subtract_product()
         response_msg = {
-            "detail":"Product subtracted successfully",
+            "type":"authenticated-user",
             **CartSerializer(
                 request.user.cart, 
                 context=self.get_serializer_context()
@@ -114,8 +120,10 @@ class CartViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.perform_subtract_product()
         response_msg = {
-            "detail":"Product subtracted successfully",
-            **self.serialize_cart_session_data(
+            "type":"anonymous-user",
+            **serialize_cart_session_data(
+                self,
+                request,
                 request.session.get('cart', {})
             )
         }
