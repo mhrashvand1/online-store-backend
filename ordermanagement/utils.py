@@ -1,5 +1,4 @@
 from product.models import Product
-from ordermanagement.models import Cart, CartItem
 from ordermanagement.serializers import ProductSerializer
 from django.conf import settings
 
@@ -12,7 +11,7 @@ def serialize_cart_session_data(view, request, data):
         "total_price":0,
         "total_discounted_price":0,
         "total_discount":0,
-        "postage_fee":settings.POSTAGE_FEE,
+        "postage_fee":settings.POSTAGE_FEE if len(data) else 0,
         "final_price":0,
         "items":list()
     }

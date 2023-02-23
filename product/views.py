@@ -76,16 +76,16 @@ class ProductViewSet(ModelViewSet):
         serializer = serializer_class(data=request.data, context=context)        
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        response_ = {"detail":"The image has been successfully added to the product."}
-        return Response(response_, 200)        
+        response_msg = {"detail":"The image has been successfully added to the product."}
+        return Response(response_msg, 200)        
     
     @action(detail=True, methods=['put',], url_name='deleteimage', url_path='deleteimage')
     def deleteimage(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)        
         serializer.is_valid(raise_exception=True)
         serializer.delete()
-        response_ = {"detail":"The image has been successfully removed from the product"}
-        return Response(response_, 200)  
+        response_msg = {"detail":"The image has been successfully removed from the product"}
+        return Response(response_msg, 200)  
     
     @action(detail=True, methods=['put',], url_name='chargestock', url_path='chargestock')
     def chargestock(self, request, *args, **kwargs):
@@ -95,5 +95,5 @@ class ProductViewSet(ModelViewSet):
         serializer = serializer_class(data=request.data, context=context)        
         serializer.is_valid(raise_exception=True) 
         serializer.perform_charge()
-        response_ = {"detail":"The stock of the product has been charged successfully."}
-        return Response(response_, 200) 
+        response_msg = {"detail":"The stock of the product has been charged successfully."}
+        return Response(response_msg, 200) 

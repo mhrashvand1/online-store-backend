@@ -112,11 +112,11 @@ class FakeChargeWalletView(GenericAPIView):
                 wallet.save()
                 Payment.objects.create(user=user, amount=amount) 
             message = {"detail":f"Your wallet was charged {amount} Tomans"}
-            response_ = {
+            response_msg = {
                 **message, 
                 **WalletSerializer(wallet, context=self.get_serializer_context()).data
             }
-            return Response(response_, 200)
+            return Response(response_msg, 200)
         except:
             raise APIException("Error while charging the wallet.")
 

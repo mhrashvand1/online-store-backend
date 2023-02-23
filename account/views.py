@@ -24,6 +24,7 @@ from common.permissions import IsSuperUser
 from account.throttles import AuthConfirmThrottle
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
+from account.signals import user_auth_confirm_signal
 
 
 User = get_user_model()
@@ -88,14 +89,21 @@ class AuthConfirmView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data.pop("user")
+        # Sending signal 
+        user_auth_confirm_signal.send(
+            sender=self.__class__, 
+            request=request,
+            user=user,
+        )
+        # Get user data and tokens for the response_msg
         user_data = UserReadOnlySerializer(
             user, 
             context=self.get_serializer_context()
         ).data
         tokens = get_tokens_for_user(user)
-        response_ = {**tokens, **user_data}
+        response_msg = {**tokens, **user_data}
         return Response(
-            response_,
+            response_msg,
             200
         )  
 
@@ -142,8 +150,8 @@ class UserViewSet(
         user.is_staff = True
         user.save()
         phone_number = serializer.validated_data['phone_number'].national_number
-        response_ = {"detail":f"The user with the phone number {phone_number} has successfully become an staff(admin)."}
-        return Response(response_, 200)
+        response_msg = {"detail":f"The user with the phone number {phone_number} has successfully become an staff(admin)."}
+        return Response(response_msg, 200)
         
     @action(detail=False, methods=['put',], url_name='unmakestaff', url_path='unmakestaff')
     def unmakestaff(self, request, *args, **kwargs):
@@ -153,8 +161,8 @@ class UserViewSet(
         user.is_staff = False
         user.save()
         phone_number = serializer.validated_data['phone_number'].national_number
-        response_ = {"detail":f"The user with phone number {phone_number} has successfully remove from being an staff(admin)."}
-        return Response(response_, 200)
+        response_msg = {"detail":f"The user with phone number {phone_number} has successfully remove from being an staff(admin)."}
+        return Response(response_msg, 200)
 
 
 
