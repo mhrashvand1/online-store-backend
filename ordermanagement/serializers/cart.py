@@ -1,33 +1,13 @@
 from rest_framework import serializers
-from ordermanagement.models import Cart, CartItem, Order, OrderItem
+from ordermanagement.models import Cart, CartItem
 from product.models import Product
-from django.urls import reverse
-from common.utils import get_abs_url
-from account.serializers import UserReadOnlySerializer
 from rest_framework.exceptions import ValidationError
 from django.db.models import Count
 from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
+from ordermanagement.serializers.product import ProductSerializer
 
-
-class ProductSerializer(serializers.ModelSerializer):
-    
-    url = serializers.SerializerMethodField()
-    discounted_price = serializers.ReadOnlyField(source='get_discounted_price')
-    discount_amount = serializers.ReadOnlyField(source='get_discount_amount')
-    
-    class Meta:
-        model = Product
-        fields = [
-            'id', 'name', 
-            'price', 'discount_percent', 'discounted_price', 'discount_amount',
-            'url',
-        ]
-
-    def get_url(self, obj):
-        url = reverse("product:products-detail", kwargs={"slug":obj.slug})
-        return get_abs_url(url)
 
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -62,7 +42,10 @@ class CartSerializer(serializers.ModelSerializer):
             'total_price', 'total_discounted_price', 'total_discount',
             'postage_fee', 'final_price', 'items'
         ]
-        
+     
+##############################################################
+##############################################################
+##############################################################   
         
 class CartAddProductSerializer(serializers.Serializer):
     product_id = serializers.UUIDField(required=True, allow_null=False)
@@ -223,3 +206,5 @@ class CartSubtractProductSerialzier(serializers.Serializer):
             cart_expiration_time = timezone.now() + timedelta(days=settings.ANONYMOUS_CART_EXPIRATION)
             request.session['cart'] = cart
             request.session.set_expiry(cart_expiration_time)
+            
+       

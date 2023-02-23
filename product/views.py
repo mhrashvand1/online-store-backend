@@ -9,7 +9,7 @@ from product.serializers import (
     ProductDeleteImageSerializer,
     ProductChargeStockSerializers
 )
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.decorators import action
 from product.models import Product, Category
 from django.db.models import Count
@@ -35,7 +35,7 @@ class CategoryViewSet(ModelViewSet):
     def permission_classes(self):
         if self.request.method in SAFE_METHODS:
             return [AllowAny,]
-        return [IsAdminUser,]
+        return [IsAuthenticated ,IsAdminUser,]
     
     
 class ProductViewSet(ModelViewSet):
@@ -66,7 +66,7 @@ class ProductViewSet(ModelViewSet):
     def permission_classes(self):
         if self.action in ['list', 'retrieve']:
             return [AllowAny,]
-        return [IsAdminUser,]
+        return [IsAuthenticated, IsAdminUser,]
     
     @action(detail=True, methods=['put',], url_name='addimage', url_path='addimage')
     def addimage(self, request, *args, **kwargs):

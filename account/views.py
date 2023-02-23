@@ -19,7 +19,7 @@ from account.serializers import (
 from django.urls import reverse
 from common.utils import get_abs_url, send_sms
 from account.utils import generate_random_code, store_code, get_tokens_for_user
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from common.permissions import IsSuperUser 
 from account.throttles import AuthConfirmThrottle
 from django.contrib.auth import get_user_model
@@ -117,7 +117,7 @@ class UserViewSet(
     @property
     def permission_classes(self):
         if self.action in ['makestaff', 'unmakestaff',]:
-            return [IsSuperUser,]
+            return [IsAuthenticated, IsSuperUser,]
         return [IsAuthenticated,]
     
     lookup_field = 'phone_number'

@@ -36,7 +36,7 @@ class WalletViewSet(
     @property
     def permission_classes(self):
         if self.action in ['update', 'partial_update']:
-            return [IsSuperUser,]
+            return [IsAuthenticated, IsSuperUser,]
         return [IsAuthenticated]
     
     def get_queryset(self):

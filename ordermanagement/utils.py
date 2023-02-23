@@ -1,5 +1,5 @@
 from product.models import Product
-from ordermanagement.serializers import ProductSerializer
+from ordermanagement.serializers.product import ProductSerializer
 from django.conf import settings
 
 

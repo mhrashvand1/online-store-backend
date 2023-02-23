@@ -145,12 +145,13 @@ class Order(UUIDBaseModel):
     def __str__(self) -> str:
         return f"{self.id}-user: {self.user.phone_number}-status: {self.status}"
      
-    def delete(self, hard=False, *args, **kwargs):
-        if hard:
-            return super().delete(*args, **kwargs)
-        else:
+    def delete(self, soft=False, *args, **kwargs):
+        if soft:
             self.status = 'deleted'
-            self.save()
+            self.save()         
+        else:
+            return super().delete(*args, **kwargs)
+
 
     def get_items_count(self):
         return self.items.aggregate(Count("id"))["id__count"]

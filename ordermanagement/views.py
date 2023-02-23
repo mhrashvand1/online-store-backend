@@ -1,13 +1,31 @@
-from rest_framework.viewsets import GenericViewSet, ViewSet
+from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
-from ordermanagement.serializers import (
+from ordermanagement.serializers.cart import (
     CartSerializer,
     CartAddProductSerializer,
     CartSubtractProductSerialzier,
 )
+from ordermanagement.serializers.order import (
+    OrderSerializer,
+    OrderChangeStatusSerializer, 
+)
+from ordermanagement.serializers.checkout import CheckoutSerializer
 from ordermanagement.utils import serialize_cart_session_data
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from ordermanagement.permissions import OrderDeletePermission
+from ordermanagement.filters import OrderFilter
+from rest_framework.mixins import (
+    RetrieveModelMixin,
+    ListModelMixin,
+    DestroyModelMixin,
+)
+from ordermanagement.models import Order
+from django.db import transaction
+from rest_framework.exceptions import APIException
+from ordermanagement.signals import change_order_status_signal
 
 
 class CartViewSet(GenericViewSet):
@@ -128,3 +146,151 @@ class CartViewSet(GenericViewSet):
             )
         }
         return Response(response_msg) 
+    
+
+################################################################
+################################################################
+####################### CheckoutView ###########################
+################################################################
+
+class CheckoutView(APIView):
+    permission_classes = [IsAuthenticated,]    
+    
+    def get(self, request, *args, **kwargs):
+        cart = request.user.cart
+        user_wallet = request.user.wallet
+        serializer = CheckoutSerializer(
+            data={},
+            context={
+                **self.get_serializer_context(),
+                "cart":cart, 
+                'user_wallet':user_wallet
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        order = serializer.perform_checkout()
+        response_msg = {
+            "detail":"The purchase has been successfully completed and your order has been registered",
+            "order":OrderSerializer(order, context=self.get_serializer_context()).data
+        }
+        return Response(response_msg)
+
+    def get_serializer_context(self):
+        return {
+            "request":self.request, 
+            "view":self,
+            "format":self.format_kwarg, 
+        }
+
+################################################################
+################################################################
+####################### OrderViewSet ###########################
+################################################################
+
+class OrderViewSet(
+    ListModelMixin,
+    RetrieveModelMixin,
+    DestroyModelMixin,
+    GenericViewSet
+):
+    
+    serializer_class = OrderSerializer
+    filterset_class = OrderFilter
+    search_fields = [] 
+    ordering_fields = [] 
+    
+    def get_serializer_class(self):
+        if self.action == 'change_status':
+            return OrderChangeStatusSerializer
+        return OrderSerializer
+    
+    @property
+    def permission_classes(self):
+        if self.action == 'destroy':
+            return [IsAuthenticated, OrderDeletePermission]
+        elif self.action == 'change_status':
+            return [IsAuthenticated, IsAdminUser,]
+        return [IsAuthenticated,]
+    
+    def get_queryset(self):
+        user = self.request.user
+        user_is_admin = user.is_staff
+        
+        if self.action in ['deleted_orders_list', 'deleted_orders_detail']:
+            if user_is_admin:
+                queryset = Order.all_objects.filter(status='deleted')
+            else:
+                queryset = Order.all_objects.filter(
+                    status='deleted', user=user
+                )
+        else:
+            if user_is_admin:
+                queryset = Order.objects.all() # Return only active orders
+            else:
+                queryset = Order.objects.filter(user=user)
+                        
+        return queryset
+    
+    
+    def perform_destroy(self, instance):
+        order = instance
+        user = order.user
+        user_wallet = user.wallet
+        try:
+            with transaction.atomic():
+                # Return the amount to the wallet
+                user_wallet.balance += order.get_final_price()
+                user_wallet.save()
+                
+                # Returns the number of stock to the products
+                for item in order.items.all():
+                    product = item.product
+                    if product:
+                        product.stock += item.quantity
+                        product.save()
+                        
+                # Delete the order
+                order.delete(soft=True)
+                
+        except:
+            raise APIException("Error while deleting order.")
+    
+    
+    @action(detail=True, methods=['put',], url_name='change_status', url_path='change_status')
+    def change_status(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new_status = serializer.validated_data['status']
+        order = self.get_object()
+        order.status = new_status
+        order.save()
+        # Sending signal for change status.
+        change_order_status_signal.send(
+            self.__class__,
+            request=request,
+            order=order,
+            new_status=new_status
+        )
+        
+        response_msg = OrderSerializer(order, context=self.get_serializer_context()).data
+        return Response(response_msg)
+        
+        
+    @action(
+        detail=False,
+        methods=['get',],
+        url_name='deleted_orders_list',
+        url_path='deleted_orders_list'
+    )
+    def deleted_orders_list(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+
+    @action(
+        detail=False, 
+        methods=['get',], 
+        url_name='deleted_orders_detail', 
+        url_path='deleted_orders_detail'
+    )
+    def deleted_orders_detail(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
