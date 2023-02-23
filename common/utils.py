@@ -1,8 +1,6 @@
 from urllib import parse
-from config import settings
+from django.conf import settings
 import hashlib
-from config.settings import PROJECT_HOST, PROJECT_PORT, PROJECT_SCHEMA
-
 
 def reverse_dict(dictionary):
     keys = dictionary.keys()
@@ -34,7 +32,7 @@ def send_sms(text, phone_number):
 
 
 def get_abs_url(path):
-    main_url = PROJECT_SCHEMA + "://" + PROJECT_HOST + ":" + PROJECT_PORT
+    main_url = settings.PROJECT_SCHEMA + "://" + settings.PROJECT_HOST + ":" + settings.PROJECT_PORT
     if not path.startswith('/'):
         path = '/' + path
     if not path.endswith('/'):

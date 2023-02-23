@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from account.models import User
 from ordermanagement.models import Order, OrderItem
-from config.settings import POSTAGE_FEE
+from django.conf import settings
 
 
 class Test(BaseTest):

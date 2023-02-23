@@ -4,9 +4,9 @@ from common.utils import get_abs_url
 from django.db import transaction
 from rest_framework.exceptions import APIException, ValidationError
 from django.db.models import Count
-from config.settings import PRODUCT_MAX_IMAGES_COUNT
 from django.urls import reverse
 from urllib.parse import urlencode
+from django.conf import settings
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -62,7 +62,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         allow_empty=False,
         allow_null=False,
         child=serializers.ImageField(required=True, allow_null=False),
-        max_length=PRODUCT_MAX_IMAGES_COUNT,
+        max_length=settings.PRODUCT_MAX_IMAGES_COUNT,
         write_only=True
     )
     category = serializers.PrimaryKeyRelatedField(
@@ -135,8 +135,8 @@ class ProductAddImageSerializer(serializers.Serializer):
     def validate(self, data):
         product = self.context['product']
         img_count = product.images.aggregate(Count('id'))['id__count']
-        if not img_count < PRODUCT_MAX_IMAGES_COUNT:
-            raise ValidationError(f"Reaching the image limit {PRODUCT_MAX_IMAGES_COUNT}.")
+        if not img_count < settings.PRODUCT_MAX_IMAGES_COUNT:
+            raise ValidationError(f"Reaching the image limit {settings.PRODUCT_MAX_IMAGES_COUNT}.")
         return data
     
     def create(self, validated_data):

@@ -3,8 +3,8 @@ from common.models import BaseModel, UUIDBaseModel
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _ 
 from django.db.models import Count, F, Sum
-from config.settings import POSTAGE_FEE, MAX_ITEM_QUANTITY
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.conf import settings
 
 User = get_user_model()
 
@@ -61,7 +61,7 @@ class Cart(UUIDBaseModel):
         orders_queryset = self.user.orders.filter(status='paid')
         if self.get_items_count()==0 or orders_queryset.exists():
             return 0 
-        return POSTAGE_FEE
+        return settings.POSTAGE_FEE
     
     def get_final_price(self):
         return self.get_total_discounted_price() + self.get_postage_fee()
@@ -89,7 +89,7 @@ class CartItem(UUIDBaseModel):
     )
     quantity = models.PositiveSmallIntegerField(
         default=1,
-        validators=(MinValueValidator(1), MaxValueValidator(MAX_ITEM_QUANTITY))
+        validators=(MinValueValidator(1), MaxValueValidator(settings.MAX_ITEM_QUANTITY))
     )
     
     def __str__(self) -> str:
@@ -208,7 +208,7 @@ class OrderItem(UUIDBaseModel):
     )
     quantity = models.PositiveSmallIntegerField(
         default=1,
-        validators=(MinValueValidator(1), MaxValueValidator(MAX_ITEM_QUANTITY))
+        validators=(MinValueValidator(1), MaxValueValidator(settings.MAX_ITEM_QUANTITY))
     )
     # To display invoices in case of product removal or changes in product price, ...
     # We need to store sensitive product data directly in the Order table

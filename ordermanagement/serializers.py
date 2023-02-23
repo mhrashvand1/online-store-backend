@@ -6,13 +6,9 @@ from common.utils import get_abs_url
 from account.serializers import UserReadOnlySerializer
 from rest_framework.exceptions import ValidationError
 from django.db.models import Count
-from config.settings import (
-    MAX_CART_ITEMS,
-    MAX_ITEM_QUANTITY, 
-    ANONYMOUS_CART_EXPIRATION
-)
 from datetime import timedelta
 from django.utils import timezone
+from django.conf import settings
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -97,8 +93,8 @@ class CartAddProductSerializer(serializers.Serializer):
             item = cart_item_qs.first()
             item_quantity = item.quantity
             
-            if item_quantity + 1 > MAX_ITEM_QUANTITY:
-                raise ValidationError(f"The maximum quantity of products in each item is {MAX_ITEM_QUANTITY}")
+            if item_quantity + 1 > settings.MAX_ITEM_QUANTITY:
+                raise ValidationError(f"The maximum quantity of products in each item is {settings.MAX_ITEM_QUANTITY}")
             
             if item_quantity + 1 > stock:
                 raise ValidationError(f"The product stock is {stock}")
@@ -110,8 +106,8 @@ class CartAddProductSerializer(serializers.Serializer):
             if not stock > 0:
                 raise ValidationError("The product stock is 0")
             
-            if not cart.items.aggregate(count=Count('id'))['count'] < MAX_CART_ITEMS:
-                raise ValidationError(f"The Item count limit is {MAX_CART_ITEMS}.")      
+            if not cart.items.aggregate(count=Count('id'))['count'] < settings.MAX_CART_ITEMS:
+                raise ValidationError(f"The Item count limit is {settings.MAX_CART_ITEMS}.")      
         
             data['is_new_item'] = True
             
@@ -125,8 +121,8 @@ class CartAddProductSerializer(serializers.Serializer):
         
         if cart.get(product_id):
             item_quantity = cart[product_id]
-            if item_quantity + 1 > MAX_ITEM_QUANTITY:
-                raise ValidationError(f"The maximum quantity of products in each item is {MAX_ITEM_QUANTITY}")
+            if item_quantity + 1 > settings.MAX_ITEM_QUANTITY:
+                raise ValidationError(f"The maximum quantity of products in each item is {settings.MAX_ITEM_QUANTITY}")
             
             if item_quantity + 1 > stock:
                 raise ValidationError(f"The product stock is {stock}") 
@@ -137,8 +133,8 @@ class CartAddProductSerializer(serializers.Serializer):
             if not stock > 0:
                 raise ValidationError("The product stock is 0")
             
-            if not len(cart) < MAX_CART_ITEMS:
-                raise ValidationError(f"The Item count limit is {MAX_CART_ITEMS}.")
+            if not len(cart) < settings.MAX_CART_ITEMS:
+                raise ValidationError(f"The Item count limit is {settings.MAX_CART_ITEMS}.")
             
             data['is_new_item'] = True 
 
@@ -162,7 +158,7 @@ class CartAddProductSerializer(serializers.Serializer):
         else:
             cart = request.session.get('cart', {})
             cart[product_id] = cart.get(product_id, 0) + 1
-            cart_expiration_time = timezone.now() + timedelta(days=ANONYMOUS_CART_EXPIRATION)
+            cart_expiration_time = timezone.now() + timedelta(days=settings.ANONYMOUS_CART_EXPIRATION)
             request.session['cart'] = cart
             request.session.set_expiry(cart_expiration_time)
         
@@ -224,6 +220,6 @@ class CartSubtractProductSerialzier(serializers.Serializer):
             else:
                 del cart[product_id]
                 
-            cart_expiration_time = timezone.now() + timedelta(days=ANONYMOUS_CART_EXPIRATION)
+            cart_expiration_time = timezone.now() + timedelta(days=settings.ANONYMOUS_CART_EXPIRATION)
             request.session['cart'] = cart
             request.session.set_expiry(cart_expiration_time)

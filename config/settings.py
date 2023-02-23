@@ -1,6 +1,5 @@
 from pathlib import Path
 from decouple import config
-import redis
 from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -155,8 +154,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REDIS_HOST = config("REDIS_HOST", default="redis")
 REDIS_PORT = config("REDIS_PORT", default=6379)
 REDIS_DB_NUMBER = config("REDIS_DB_NUMBER", default=0)
-
-redis_connection = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB_NUMBER)
 
 # Cache FrameWork Config
 CACHES = {

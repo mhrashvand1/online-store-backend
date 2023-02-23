@@ -5,7 +5,6 @@ from django.db import transaction
 from django.utils.crypto import get_random_string
 from rest_framework.exceptions import APIException, ValidationError, PermissionDenied
 from rest_framework.validators import UniqueValidator
-from config.settings import CODE_LENGTH
 from common.utils import hash_string
 from account.utils import retrieve_code, delete_code
 from django.contrib.auth import get_user_model
@@ -14,7 +13,7 @@ from common.utils import get_abs_url
 from django.urls import reverse
 from urllib.parse import urlencode
 from ordermanagement.models import Cart
-
+from django.conf import settings
 
 User = get_user_model()
 
@@ -131,8 +130,8 @@ class AuthConfirmSerializer(serializers.Serializer):
         allow_null=False, 
         allow_blank=False, 
         required=True,
-        min_length=CODE_LENGTH,
-        max_length=CODE_LENGTH,
+        min_length=settings.CODE_LENGTH,
+        max_length=settings.CODE_LENGTH,
     )
    
     def validate(self, data):

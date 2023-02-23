@@ -1,14 +1,14 @@
 from common.throttles import CustomBaseThrottle
-from config.settings import CODE_EXPIRE_TIME
 from common.serializers import PhoneNumberSerializer
 from account.utils import retrieve_code
+from django.conf import settings
 
 
 class AuthConfirmThrottle(CustomBaseThrottle):
     
     def __init__(self):
         self.num_requests = 5
-        self.duration = CODE_EXPIRE_TIME*60  # seconds
+        self.duration = settings.CODE_EXPIRE_TIME*60  # seconds
     
     def get_cache_key(self, request, view):
         phone_number = request.data.get("phone_number")
