@@ -1,5 +1,4 @@
 # online-store-backend   
-(The project is not complete)  
 
 ## Run 
 ``` bash
