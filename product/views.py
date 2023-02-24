@@ -26,13 +26,23 @@ class CategoryViewSet(ModelViewSet):
     serializer_class = CategorySerializer
     filterset_class = CategoryFilter
     search_fields = ['name', 'description',]
-    ordering_fields = ['product_count',]
+    ordering_fields = ['product_count', 'sales_count', 'last_week_sales_count']
     
     def get_queryset(self):
-        qs = Category.objects.annotate(
-            product_count=Count('products')
+        one_week_ago = timezone.now() - timedelta(days=7)
+
+        queryset = Category.objects.prefetch_related(
+            'products'
+        ).annotate(
+            product_count=Count('products'),
+            sales_count=Sum('products__orderitems__quantity'),
+            last_week_sales_count=Sum(
+                'products__orderitems__quantity',
+                filter=Q(products__orderitems__created_at__gte=one_week_ago)
+            ),   
         ).all()
-        return qs
+        
+        return queryset
     
     @property
     def permission_classes(self):
@@ -46,7 +56,11 @@ class ProductViewSet(ModelViewSet):
     lookup_field = 'slug'
     filterset_class = ProductFilter
     search_fields = ['name', 'description', 'category__name', 'category__description']
-    ordering_fields = ['price', 'stock', ]
+    ordering_fields = [
+        'price', 'stock', 'discount_percent', 'discounted_price', 'discount_amount'
+        'sales_count', 'last_week_sales_count',
+        
+    ]
 
 
     def get_queryset(self):

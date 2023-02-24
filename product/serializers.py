@@ -16,10 +16,19 @@ class CategorySerializer(serializers.ModelSerializer):
         view_name='product:categories-detail', 
         lookup_field="slug",  read_only=True,
     )
+    # fields annotated to the queryset
+    sales_count = serializers.ReadOnlyField()
+    last_week_sales_count = serializers.ReadOnlyField()
     
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'description', 'products', 'detail', 'created_at', 'updated_at']
+        fields = [
+            'id', 'name', 'slug', 
+            'description', 'products', 
+            'sales_count', 'last_week_sales_count',
+            'detail', 'created_at', 
+            'updated_at'
+        ]
     
     def get_products(self, obj):
         id = str(obj.id)
