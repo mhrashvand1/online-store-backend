@@ -26,6 +26,7 @@ from ordermanagement.models import Order
 from django.db import transaction
 from rest_framework.exceptions import APIException
 from ordermanagement.signals import change_order_status_signal
+from django.db.models import F, Q, Sum, Count
 
 
 class CartViewSet(GenericViewSet):
@@ -196,8 +197,22 @@ class OrderViewSet(
     
     serializer_class = OrderSerializer
     filterset_class = OrderFilter
-    search_fields = [] 
-    ordering_fields = [] 
+    search_fields = [
+        'user__first_name', 
+        'user__last_name',
+        'user__phone_number',
+        'items__p_name',
+    ] 
+    ordering_fields = [
+        'user', 
+        'status',
+        'postage_fee', 
+        'items_count', 
+        'total_price', 
+        'total_discounted_price',
+        'total_discount',
+        'final_price',
+    ] 
     
     def get_serializer_class(self):
         if self.action == 'change_status':
@@ -212,23 +227,54 @@ class OrderViewSet(
             return [IsAuthenticated, IsAdminUser,]
         return [IsAuthenticated,]
     
+    
     def get_queryset(self):
         user = self.request.user
         user_is_admin = user.is_staff
         
+        queryset = Order.all_objects.prefetch_related(
+            'items', 
+            'items__product',
+            'user',
+            'user__address',
+            'user__location',
+        )
+        
         if self.action in ['deleted_orders_list', 'deleted_orders_detail']:
             if user_is_admin:
-                queryset = Order.all_objects.filter(status='deleted')
+                queryset = queryset.filter(status='deleted')
             else:
-                queryset = Order.all_objects.filter(
+                queryset = queryset.filter(
                     status='deleted', user=user
                 )
         else:
             if user_is_admin:
-                queryset = Order.objects.all() # Return only active orders
+                queryset = queryset.exclude(status='deleted')
             else:
-                queryset = Order.objects.filter(user=user)
-                        
+                queryset = queryset.filter(user=user).exclude(status='deleted')
+        
+        # Annotate statistic fields
+        queryset = queryset.annotate(
+            items_count=Count('items'),
+            total_price=Sum(
+                F("items__quantity")*F('items__p_price')
+            ),
+            total_discounted_price=Sum(
+                F("items__quantity")*
+                (
+                    F('items__p_price') - 
+                    F('items__p_price')*F('items__p_discount_percent')/100
+                )
+            ),
+            total_discount=Sum(
+                F("items__quantity")*
+                (
+                    F("items__p_price")*F("items__p_discount_percent")/100
+                )
+            ),
+            final_price=F('total_discounted_price') + F('postage_fee')
+        )
+                 
         return queryset
     
     

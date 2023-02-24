@@ -190,6 +190,7 @@ class Order(UUIDBaseModel):
         db_table = 'Order'
         verbose_name = _('order')
         verbose_name_plural = _('orders')
+        ordering = ['user',]
 
 
 class OrderItem(UUIDBaseModel):

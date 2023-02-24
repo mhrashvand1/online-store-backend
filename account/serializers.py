@@ -148,8 +148,7 @@ class AuthConfirmSerializer(serializers.Serializer):
         phone_number = data['phone_number']
 
         try:
-            user = User.objects.select_related("address").select_related("location"). \
-                get(phone_number=phone_number)
+            user = User.objects.get(phone_number=phone_number)
         except User.DoesNotExist:
             raise ValidationError(f"User with phone number {phone_number} does not exists.")
      

@@ -48,11 +48,11 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     user = UserReadOnlySerializer()
-    items_count = serializers.ReadOnlyField(source='get_items_count') #
-    total_price = serializers.ReadOnlyField(source='get_total_price') #
-    total_discounted_price = serializers.ReadOnlyField(source='get_total_discounted_price') #
-    total_discount = serializers.ReadOnlyField(source='get_total_discount') #
-    final_price = serializers.ReadOnlyField(source='get_final_price') #
+    items_count = serializers.ReadOnlyField(source='get_items_count')
+    total_price = serializers.ReadOnlyField(source='get_total_price')
+    total_discounted_price = serializers.ReadOnlyField(source='get_total_discounted_price')
+    total_discount = serializers.ReadOnlyField(source='get_total_discount')
+    final_price = serializers.ReadOnlyField(source='get_final_price')
     items = OrderItemSerializer(many=True)
     detail = serializers.SerializerMethodField()
     

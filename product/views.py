@@ -32,8 +32,10 @@ class CategoryViewSet(ModelViewSet):
         one_week_ago = timezone.now() - timedelta(days=7)
 
         queryset = Category.objects.prefetch_related(
-            'products'
-        ).annotate(
+            'products', 'products__orderitems'
+        )
+
+        queryset = queryset.annotate(
             product_count=Count('products'),
             sales_count=Sum('products__orderitems__quantity'),
             last_week_sales_count=Sum(
@@ -66,11 +68,11 @@ class ProductViewSet(ModelViewSet):
     def get_queryset(self):
         one_week_ago = timezone.now() - timedelta(days=7)
 
-        queryset =  Product.objects.prefetch_related(
-            'category'
-        ).prefetch_related(
-            'orderitems'
-        ).annotate(
+        queryset = Product.objects.prefetch_related(
+            "category", "orderitems", 
+        )
+
+        queryset = queryset.annotate(
             discounted_price=F('price') - F('price')*F('discount_percent')/100,
             discount_amount=F('price')*F('discount_percent')/100,
             sales_count=Sum('orderitems__quantity'),

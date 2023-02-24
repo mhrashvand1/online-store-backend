@@ -132,15 +132,19 @@ class UserViewSet(
         else:
             return UserReadOnlySerializer
         
+        
     def get_queryset(self):
         user = self.request.user
+        
+        queryset = User.objects.prefetch_related("address", "location", "wallet")
+        
         if user.is_staff:
-            queryset = User.objects.prefetch_related("address") \
-                .prefetch_related("location").prefetch_related("wallet").all()
+            queryset = queryset.all()
         else:
-            queryset = User.objects.prefetch_related("address") \
-                .prefetch_related("location").prefetch_related("wallet").filter(id=user.id)  
+            queryset = queryset.filter(id=user.id)  
+            
         return queryset
+    
     
     @action(detail=False, methods=['put',], url_name='makestaff', url_path='makestaff')
     def makestaff(self, request, *args, **kwargs):
@@ -180,7 +184,7 @@ class ProfileViewSet(
         return UserInfoUpdateSerializer
     
     def get_object(self):
-        obj = User.objects.select_related("address").select_related("location"). \
+        obj = User.objects.select_related("address", "location", "wallet"). \
             get(phone_number=self.request.user.phone_number)
         return obj
 
