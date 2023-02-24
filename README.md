@@ -2,12 +2,14 @@
 
 ## Run 
 ``` bash
-# clone and navigate to the online-store-backend
+# Clone and navigate to the online-store-backend
 git clone git@github.com:mhrashvand1/online-store-backend.git  
 cd online-store-backend  
-# run docker compose
+# Run docker compose
 docker-compose -f docker-compose.dev.yml up  
-# Note that you shouldn't run docker-compose with the '-d' flag because SMSs will print in the terminal and you need to monitor them for sign up, sign in, and other related activities.   
+# Note that you shouldn't run docker-compose with the '-d' flag   
+# because SMSs will print in the terminal   
+# and you need to monitor them for sign up, sign in, and other related activities.   
 ```   
 
 To create a superuser:   
