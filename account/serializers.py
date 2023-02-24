@@ -21,7 +21,9 @@ class AddressSerializer(serializers.Serializer):
     state = serializers.CharField(allow_blank=False, allow_null=False, max_length=150, required=True)
     city = serializers.CharField(allow_blank=False, allow_null=False, max_length=150, required=True)
     full_address = serializers.CharField(allow_blank=False, allow_null=False, max_length=1200, required=True)
-
+    created_at = serializers.ReadOnlyField()
+    updated_at = serializers.ReadOnlyField()
+    
         
 class LocationSerializer(serializers.Serializer):
     latitude = serializers.DecimalField(
@@ -32,7 +34,9 @@ class LocationSerializer(serializers.Serializer):
         max_digits=9, decimal_places=6,
         allow_null=False, required=True, coerce_to_string=False
     )
-
+    created_at = serializers.ReadOnlyField()
+    updated_at = serializers.ReadOnlyField()
+    
 
 class UserReadOnlySerializer(serializers.ModelSerializer):
     
@@ -40,6 +44,7 @@ class UserReadOnlySerializer(serializers.ModelSerializer):
     location = LocationSerializer(read_only=True, many=False)
     wallet = serializers.SerializerMethodField()
     payments = serializers.SerializerMethodField()
+    orders = serializers.SerializerMethodField()
     detail = serializers.HyperlinkedIdentityField(
         view_name="account:users-detail", lookup_field="phone_number",
         read_only=True
@@ -50,7 +55,7 @@ class UserReadOnlySerializer(serializers.ModelSerializer):
         fields = (
             "phone_number", "first_name", "last_name", 
             "is_staff", "is_superuser", "address", "location",
-            "wallet", "payments", "detail"
+            "wallet", "payments", "orders", "detail", "created_at", "updated_at",
         )    
         
     def get_wallet(self, obj):
@@ -66,6 +71,11 @@ class UserReadOnlySerializer(serializers.ModelSerializer):
     def get_payments(self, obj):
         phone_number = str(obj.phone_number.national_number)
         url = get_abs_url(reverse("wallet:payments-list")) + '?' + urlencode({"user":phone_number})
+        return url
+    
+    def get_orders(self, obj):
+        phone_number = str(obj.phone_number.national_number)
+        url = get_abs_url(reverse("ordermanagement:orders-list")) + '?' + urlencode({"user":phone_number})
         return url
     
 
@@ -168,6 +178,8 @@ class UserInfoUpdateSerializer(serializers.Serializer):
         view_name="account:users-detail", lookup_field="phone_number",
         read_only=True
     )
+    created_at = serializers.ReadOnlyField()
+    updated_at = serializers.ReadOnlyField()
   
     def update(self, instance, validated_data):
         address_data = validated_data.pop("address")

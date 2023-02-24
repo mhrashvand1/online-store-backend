@@ -17,7 +17,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'order', 
             'item_price', 'item_discounted_price', 'item_discount_amount',
-            'product', 'quantity'
+            'product', 'quantity', 'created_at', 'updated_at',
         ]
     
     def get_product(self, obj):
@@ -62,7 +62,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'id', 'status', 'user', 
             'items_count',
             'total_price', 'total_discounted_price', 'total_discount',
-            'postage_fee', 'final_price', 'items', 'detail'
+            'postage_fee', 'final_price', 'items', 'detail', 'created_at', 'updated_at'
         ] 
         
     def get_detail(self, obj):

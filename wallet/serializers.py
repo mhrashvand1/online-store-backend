@@ -14,7 +14,7 @@ class WalletSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Wallet
-        fields = ['id', 'user', 'balance', 'detail']
+        fields = ['id', 'user', 'balance', 'detail', 'created_at', 'updated_at']
         
     def get_user(self, obj):
         phone_number = str(obj.user.phone_number.national_number)
@@ -39,7 +39,7 @@ class PaymentSeralizer(serializers.ModelSerializer):
         model = Payment
         fields = [
             'id', 'user', 'amount', 'status', 
-            'error_code', 'error_message', 'detail'
+            'error_code', 'error_message', 'detail', 'created_at', 'updated_at'
         ]
         
     def get_user(self, obj):

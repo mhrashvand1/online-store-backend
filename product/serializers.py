@@ -19,7 +19,7 @@ class CategorySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'description', 'products', 'detail']
+        fields = ['id', 'name', 'slug', 'description', 'products', 'detail', 'created_at', 'updated_at']
     
     def get_products(self, obj):
         id = str(obj.id)
