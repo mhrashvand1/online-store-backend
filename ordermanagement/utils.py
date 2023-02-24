@@ -16,7 +16,9 @@ def serialize_cart_session_data(view, request, data):
         "items":list()
     }
     
-    product_qs = Product.objects.filter(id__in=data.keys())
+    product_qs = Product.objects.prefetch_related(
+        'category'
+    ).filter(id__in=data.keys())
     
     # Add items
     for product in product_qs:

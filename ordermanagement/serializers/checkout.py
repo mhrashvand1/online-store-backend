@@ -13,7 +13,9 @@ class CheckoutSerializer(serializers.Serializer):
         cart = self.context['cart']
         user_wallet = self.context['user_wallet']
         
-        cart_items = cart.items.all()
+        cart_items = cart.items.prefetch_related(
+            'product'
+        ).all()
         
         # Check if user added product to the cart
         if not cart_items.exists():
