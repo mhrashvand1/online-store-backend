@@ -15,6 +15,9 @@ from product.models import Product, Category
 from django.db.models import Count
 from product.filters import CategoryFilter, ProductFilter
 from rest_framework.permissions import SAFE_METHODS
+from django.db.models import F, Sum, Q, Count
+from django.utils import timezone
+from datetime import timedelta
 
 
 class CategoryViewSet(ModelViewSet):
@@ -45,8 +48,25 @@ class ProductViewSet(ModelViewSet):
     search_fields = ['name', 'description', 'category__name', 'category__description']
     ordering_fields = ['price', 'stock', ]
 
+
     def get_queryset(self):
-        return Product.objects.all()
+        one_week_ago = timezone.now() - timedelta(days=7)
+
+        queryset =  Product.objects.prefetch_related(
+            'category'
+        ).prefetch_related(
+            'orderitems'
+        ).annotate(
+            discounted_price=F('price') - F('price')*F('discount_percent')/100,
+            discount_amount=F('price')*F('discount_percent')/100,
+            sales_count=Sum('orderitems__quantity'),
+            last_week_sales_count=Sum(
+                'orderitems__quantity',
+                filter=Q(orderitems__created_at__gte=one_week_ago)
+            )
+        ).all()
+        return queryset
+
 
     def get_serializer_class(self):
         if self.action == 'create':
