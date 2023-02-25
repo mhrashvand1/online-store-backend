@@ -11,6 +11,7 @@ docker-compose -f docker-compose.dev.yml up
 # because SMSs will print in the terminal   
 # and you need to monitor them for sign up, sign in, and other related activities.   
 ```   
+The project will be accessed on `localhost` at port `8000`.   
 
 To create a superuser:   
  
